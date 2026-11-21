@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Invitation pour Ranim</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pacifico&display=swap">
+<style>
+  /* Layout: une carte douce centrée sur un fond rose et lilas, des cœurs qui flottent derrière ; le bouton Non se balade sur toute la page. */
+  :root {
+    --bg: #ffe6f0;
+    --bg-2: #eadbff;
+    --card: rgba(255, 255, 255, 0.86);
+    --fg: #4b1d41;
+    --muted: #8a5e80;
+    --accent: #d6336f;
+    --accent-ink: #ffffff;
+    --accent-soft: #ffd3e5;
+    --lilac: #b693f5;
+    --line: #f3b9d3;
+    --shadow: 0 18px 50px rgba(214, 51, 111, 0.22);
+    --font-body: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+    --font-script: "Pacifico", "Brush Script MT", cursive;
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { min-height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+    background-attachment: fixed;
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  #floaters { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .floater { position: absolute; bottom: -60px; opacity: 0; animation: rise linear infinite; }
+  .floater svg { display: block; width: 100%; height: 100%; }
+  @keyframes rise {
+    0% { transform: translateY(0) rotate(-8deg); opacity: 0; }
+    12% { opacity: 0.55; }
+    88% { opacity: 0.4; }
+    100% { transform: translateY(-115vh) rotate(10deg); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floater { animation: none; opacity: 0.35; bottom: auto; }
+  }
+
+  main { position: relative; z-index: 1; width: 100%; max-width: 560px; }
+
+  .card {
+    background: var(--card);
+    border: 2px solid #fff;
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+    padding: 36px 24px 32px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .badge {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: var(--accent-soft);
+    display: grid; place-items: center;
+  }
+  .badge svg { width: 40px; height: 40px; }
+
+  .eyebrow {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1, h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 7.4vw, 2.7rem);
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+  h1 .name {
+    font-family: var(--font-script);
+    font-weight: 400;
+    color: var(--accent);
+    display: inline-block;
+    padding-right: 0.1em;
+  }
+
+  .sub { margin: 0; color: var(--muted); max-width: 36ch; text-wrap: balance; }
+
+  .actions {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 16px; width: 100%; min-height: 5.5rem;
+  }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border: 2px solid transparent; border-radius: 999px;
+    line-height: 1.2;
+  }
+  button:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+
+  #yes {
+    --g: 1;
+    font-size: calc(1.15rem * var(--g));
+    padding: 0.7em 1.8em;
+    background: var(--accent); color: var(--accent-ink);
+    box-shadow: 0 8px 20px rgba(214, 51, 111, 0.35);
+    max-width: 100%;
+    transition: font-size 0.3s ease, transform 0.15s ease;
+  }
+  #yes:hover { transform: translateY(-2px); }
+
+  #no {
+    font-size: 1rem; padding: 0.7em 1.5em;
+    background: #fff; color: var(--muted); border-color: var(--line);
+    transition: transform 0.28s cubic-bezier(0.3, 1.4, 0.5, 1);
+    will-change: transform; position: relative; z-index: 6;
+  }
+
+  .hint { margin: 0; min-height: 1.6em; color: var(--muted); font-size: 0.95rem; }
+
+  .group { width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+  .group > .label { font-weight: 600; font-size: 0.95rem; color: var(--muted); }
+
+  .grid { display: grid; gap: 8px; }
+  .grid.days { grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); }
+  .grid.times { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
+
+  .chip {
+    background: #fff; color: var(--fg); border-color: var(--line);
+    padding: 8px 6px; border-radius: 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 0;
+  }
+  .chip small { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+  .chip strong { font-size: 1.3rem; line-height: 1.15; }
+  .chip.time { padding: 10px 6px; font-size: 1rem; border-radius: 999px; }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .chip[aria-pressed="true"] small { color: #ffe3ee; }
+
+  .btn-primary {
+    background: var(--accent); color: var(--accent-ink);
+    padding: 0.85em 1.8em; box-shadow: 0 8px 20px rgba(214, 51, 111, 0.3);
+    max-width: 100%;
+  }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+  .summary { background: var(--accent-soft); border-radius: 22px; padding: 16px 20px; width: 100%; }
+  .summary p { margin: 0; }
+  .summary .big { font-size: 1.35rem; font-weight: 600; text-transform: capitalize; }
+  .summary .where { color: var(--muted); margin-top: 4px; }
+
+  .note { margin: 0; font-size: 0.95rem; color: var(--muted); text-wrap: balance; }
+  .err { color: #b3123f; font-weight: 600; }
+
+  #burst { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+  @media (prefers-reduced-motion: reduce) { #no, #yes { transition: none; } }
+</style>
+</head>
+<body>
+
+<div id="floaters" aria-hidden="true"></div>
+
+<main>
+  <section class="card" id="ask" aria-labelledby="title">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="#d6336f" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 2.8 4.5 6.4 4.5c2.1 0 3.9 1.1 5.6 3.2 1.7-2.1 3.5-3.2 5.6-3.2 3.6 0 5.5 3.7 4 7.2C19.5 16.4 12 21 12 21z"/></svg>
+    </div>
+    <p class="eyebrow">Une invitation rien que pour toi</p>
+    <h1 id="title"></h1>
+    <div class="actions" id="actions">
+      <button id="yes" type="button">Oui, avec plaisir</button>
+      <button id="no" type="button">Non</button>
+    </div>
+    <p class="hint" id="hint" aria-live="polite"></p>
+  </section>
+
+  <section class="card" id="pick" hidden aria-labelledby="pickTitle">
+    <p class="eyebrow">Yaaay</p>
+    <h2 id="pickTitle">Choisis ton jour et ton heure</h2>
+    <p class="sub">Je m'occupe du reste : je choisis l'endroit et je te contacte très vite.</p>
+
+    <div class="group">
+      <span class="label" id="dayLabel">Quel jour ?</span>
+      <div class="grid days" id="days" role="group" aria-labelledby="dayLabel"></div>
+    </div>
+
+    <div class="group">
+      <span class="label" id="timeLabel">À quelle heure ?</span>
+      <div class="grid times" id="times" role="group" aria-labelledby="timeLabel"></div>
+    </div>
+
+    <button class="btn-primary" id="confirm" type="button" disabled>Confirmer ma sortie</button>
+    <p class="note err" id="err" aria-live="polite" hidden></p>
+  </section>
+
+  <section class="card" id="done" hidden aria-labelledby="doneTitle" aria-live="polite">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="#d6336f" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 2.8 4.5 6.4 4.5c2.1 0 3.9 1.1 5.6 3.2 1.7-2.1 3.5-3.2 5.6-3.2 3.6 0 5.5 3.7 4 7.2C19.5 16.4 12 21 12 21z"/></svg>
+    </div>
+    <h2 id="doneTitle">C'est confirmé</h2>
+    <div class="summary">
+      <p class="big" id="sumWhen"></p>
+      <p class="where">Le lieu reste une surprise, je te dis tout très vite.</p>
+    </div>
+    <p class="note">Un e-mail de confirmation vient de partir pour vous deux.</p>
+  </section>
+</main>
+
+<canvas id="burst" aria-hidden="true"></canvas>
+
+<script>
+  // À personnaliser : tout vient d'ici.
+  var CONFIG = {
+    name: "Ranim",
+    question: "tu veux bien sortir avec moi ?",
+    scriptUrl: "https://script.google.com/macros/s/AKfycbwjk9PkLu9EOwLDpgxThM4pWd1uMiZINTXN_nZb8AIAaepKPJHCYUPrXaWY7vzE06LP/exec",  // adresse en /exec de ton script Google (voir Code.gs)
+    token: "82Ko5baWUAaR3CqN"       // même mot de passe que TOKEN dans Code.gs
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var HEART = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 2.8 4.5 6.4 4.5c2.1 0 3.9 1.1 5.6 3.2 1.7-2.1 3.5-3.2 5.6-3.2 3.6 0 5.5 3.7 4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+
+  // Titre
+  document.title = "Invitation pour " + CONFIG.name;
+  var t = $("title");
+  var nm = document.createElement("span");
+  nm.className = "name";
+  nm.textContent = CONFIG.name + ",";
+  t.appendChild(nm);
+  t.appendChild(document.createTextNode(" " + CONFIG.question));
+
+  // Cœurs flottants en fond
+  (function () {
+    var box = $("floaters"), colors = ["#ff9cc2", "#ffc2da", "#c9a8ff", "#ffb3cf", "#e6d3ff"];
+    for (var i = 0; i < 16; i++) {
+      var d = document.createElement("div");
+      var s = 18 + Math.random() * 34;
+      d.className = "floater";
+      d.style.left = (Math.random() * 96).toFixed(1) + "%";
+      d.style.width = d.style.height = s.toFixed(0) + "px";
+      d.style.color = colors[i % colors.length];
+      if (reduce) { d.style.top = (Math.random() * 90).toFixed(0) + "%"; }
+      else {
+        d.style.animationDuration = (14 + Math.random() * 14).toFixed(1) + "s";
+        d.style.animationDelay = (-Math.random() * 24).toFixed(1) + "s";
+      }
+      d.innerHTML = HEART;
+      box.appendChild(d);
+    }
+  })();
+
+  // Bouton Non qui change de place
+  var yes = $("yes"), no = $("no"), hint = $("hint");
+  var tries = 0, curX = 0, curY = 0;
+  var hints = [
+    "Oups, le bouton Non vient de s'enfuir.",
+    "Il est timide, il se cache.",
+    "Il fait son sport du soir.",
+    "Le Oui, lui, ne bouge pas.",
+    "Ce bouton n'aime pas être cliqué.",
+    "Regarde comme le Oui grandit.",
+    "Tu peux arrêter de courir après.",
+    "Le Oui t'attend, juste là."
+  ];
+
+  function dodge() {
+    tries++;
+    var r = no.getBoundingClientRect();
+    var baseL = r.left - curX, baseT = r.top - curY;
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight, m = 12;
+    var minX = m - baseL, maxX = vw - m - r.width - baseL;
+    var minY = m - baseT, maxY = vh - m - r.height - baseT;
+    if (maxX < minX) { minX = maxX = 0; }
+    if (maxY < minY) { minY = maxY = 0; }
+    var nx = curX, ny = curY, best = -1;
+    for (var i = 0; i < 14; i++) {
+      var tx = minX + Math.random() * (maxX - minX);
+      var ty = minY + Math.random() * (maxY - minY);
+      var d = Math.hypot(tx - curX, ty - curY);
+      if (d > best) { best = d; nx = tx; ny = ty; }
+      if (d > 160) { nx = tx; ny = ty; break; }
+    }
+    curX = nx; curY = ny;
+    no.style.transform = "translate(" + nx.toFixed(0) + "px," + ny.toFixed(0) + "px)";
+    yes.style.setProperty("--g", Math.min(1 + tries * 0.13, 2.2).toFixed(2));
+    hint.textContent = hints[(tries - 1) % hints.length];
+  }
+
+  no.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") dodge(); });
+  no.addEventListener("pointerdown", function (e) { e.preventDefault(); dodge(); });
+  no.addEventListener("touchstart", function (e) { e.preventDefault(); dodge(); }, { passive: false });
+  no.addEventListener("focus", dodge);
+  no.addEventListener("click", function (e) { e.preventDefault(); dodge(); });
+  window.addEventListener("resize", function () { curX = 0; curY = 0; no.style.transform = "translate(0,0)"; });
+
+  // Cœurs en confettis
+  var canvas = $("burst"), ctx = canvas.getContext("2d");
+  var parts = [], raf = null;
+  function size() {
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function heart(x, y, s) {
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.3);
+    ctx.bezierCurveTo(x, y - s * 0.3, x - s, y - s * 0.3, x - s, y + s * 0.3);
+    ctx.bezierCurveTo(x - s, y + s * 0.75, x, y + s * 1.0, x, y + s * 1.25);
+    ctx.bezierCurveTo(x, y + s * 1.0, x + s, y + s * 0.75, x + s, y + s * 0.3);
+    ctx.bezierCurveTo(x + s, y - s * 0.3, x, y - s * 0.3, x, y + s * 0.3);
+    ctx.closePath();
+    ctx.fill();
+  }
+  function burst(count) {
+    size();
+    var colors = ["#d6336f", "#ff7aa8", "#ffb3cf", "#b693f5", "#ffffff", "#ffd36e"];
+    var n = reduce ? Math.min(count, 18) : count;
+    for (var i = 0; i < n; i++) {
+      parts.push({
+        x: window.innerWidth / 2 + (Math.random() - 0.5) * 120,
+        y: window.innerHeight * 0.6,
+        vx: (Math.random() - 0.5) * 11,
+        vy: -(5 + Math.random() * 10),
+        s: 6 + Math.random() * 10,
+        c: colors[(Math.random() * colors.length) | 0],
+        life: 1
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    parts = parts.filter(function (p) { return p.life > 0 && p.y < window.innerHeight + 40; });
+    parts.forEach(function (p) {
+      p.vy += 0.24; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.life -= 0.006;
+      ctx.globalAlpha = Math.max(p.life, 0);
+      ctx.fillStyle = p.c;
+      heart(p.x, p.y, p.s);
+    });
+    ctx.globalAlpha = 1;
+    if (parts.length) { raf = requestAnimationFrame(tick); }
+    else { raf = null; ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+  }
+
+  // Choix du jour et de l'heure
+  var pickedDate = null, pickedTime = null;
+  var fmtShort = new Intl.DateTimeFormat("fr-FR", { weekday: "short" });
+  var fmtMonth = new Intl.DateTimeFormat("fr-FR", { month: "short" });
+  var fmtLong = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+  function buildChips() {
+    var days = $("days"), times = $("times");
+    var start = new Date(); start.setHours(12, 0, 0, 0);
+    for (var i = 1; i <= 14; i++) {
+      (function (offset) {
+        var d = new Date(start.getTime()); d.setDate(d.getDate() + offset);
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", "false");
+        var a = document.createElement("small"); a.textContent = fmtShort.format(d).replace(".", "");
+        var n = document.createElement("strong"); n.textContent = d.getDate();
+        var m = document.createElement("small"); m.textContent = fmtMonth.format(d).replace(".", "");
+        b.appendChild(a); b.appendChild(n); b.appendChild(m);
+        b.addEventListener("click", function () {
+          pickedDate = d;
+          Array.prototype.forEach.call(days.children, function (c) { c.setAttribute("aria-pressed", String(c === b)); });
+          refresh();
+        });
+        days.appendChild(b);
+      })(i);
+    }
+    ["12:00", "14:00", "16:00", "17:30", "19:00", "20:00", "21:00", "22:00"].forEach(function (h) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip time"; b.setAttribute("aria-pressed", "false");
+      b.textContent = h;
+      b.addEventListener("click", function () {
+        pickedTime = h;
+        Array.prototype.forEach.call(times.children, function (c) { c.setAttribute("aria-pressed", String(c === b)); });
+        refresh();
+      });
+      times.appendChild(b);
+    });
+  }
+  function refresh() { $("confirm").disabled = !(pickedDate && pickedTime); }
+  buildChips();
+
+  yes.addEventListener("click", function () {
+    $("ask").hidden = true;
+    no.style.display = "none";
+    $("pick").hidden = false;
+    window.scrollTo(0, 0);
+    burst(90);
+  });
+
+  // Confirmation : envoi automatique des e-mails via le script Google
+  var sending = false;
+  $("confirm").addEventListener("click", function () {
+    if (!(pickedDate && pickedTime) || sending) return;
+    var btn = $("confirm"), err = $("err");
+    err.hidden = true;
+
+    if (!CONFIG.scriptUrl) {
+      err.textContent = "L'envoi des e-mails n'est pas encore configuré sur ce site.";
+      err.hidden = false;
+      return;
+    }
+
+    sending = true;
+    btn.disabled = true;
+    btn.textContent = "Envoi en cours…";
+
+    var dateText = fmtLong.format(pickedDate);
+    var url = CONFIG.scriptUrl + (CONFIG.scriptUrl.indexOf("?") > -1 ? "&" : "?") +
+      "token=" + encodeURIComponent(CONFIG.token) +
+      "&date=" + encodeURIComponent(dateText) +
+      "&time=" + encodeURIComponent(pickedTime);
+
+    fetch(url, { mode: "no-cors" }).then(function () {
+      $("sumWhen").textContent = dateText + " à " + pickedTime;
+      $("pick").hidden = true;
+      $("done").hidden = false;
+      window.scrollTo(0, 0);
+      burst(60);
+    }, function () {
+      sending = false;
+      btn.disabled = false;
+      btn.textContent = "Confirmer ma sortie";
+      err.textContent = "L'envoi n'a pas marché. Vérifie ta connexion et réessaie.";
+      err.hidden = false;
+    });
+  });
+</script>
+</body>
+</html>
